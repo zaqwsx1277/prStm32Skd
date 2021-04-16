@@ -8,14 +8,14 @@
 #ifndef PRCOMMONCLASS_TWIEGAND_HPP_
 #define PRCOMMONCLASS_TWIEGAND_HPP_
 
-#include <array>
 #include <memory>
 
 #include "TSensors.hpp"
 
-namespace wiegand {
+namespace reader {
 
-constexpr size_t maxKeyLength = 6 ;	// Максимально возможная длина ключа
+constexpr size_t defMaxKeyLength = 26 ;	// Максимально возможная длина ключа
+constexpr uint16_t defStopPeriod = 250 ; // Длительность периода ожидания конца посылки
 
 /*!
  * \brief Возможные типы протоколов
@@ -28,7 +28,7 @@ enum protocolType {
 	wiegand35 = 35,			//!< wiegand35
 	wiegand37 = 37,			//!< wiegand37
 	wiegand40 = 40,			//!< wiegand40
-	wiegand42 = 42 			//!< wiegand42	(Более длинного ключа быть не может, т.к. в протоколе выделено только 5 байт)
+	wiegand42 = 42 			//!< wiegand42
 };
 
 /*!
@@ -38,21 +38,23 @@ class TWiegand : public sensors::TSensors <uint64_t> {
 private:
 	uint8_t mPosCount { 0 } ;			///< Номер текущего принятого бита
 	protocolType mProtocolType { wiegand26 } ; ///< Версия протокола
+	uint32_t mTimeFinish { 0 } ;		///< Время для подсчёта периода окончания посылки defStopPeriod
 
 public:
 	TWiegand();
-	virtual ~TWiegand();
+	virtual ~TWiegand() = default ;
 
-	void get0 () ;						///< Добавление очередного бита 0 в mValue
-	void get1 () ;						///< Добавление очередного бита 1 в mValue
-	protocolType getProtocol () ;		///< Проверка типа протокола
+	void get (uint8_t) ;				///< Добавление очередного бита в mValue
+	protocolType checkProtocol () ;		///< Проверка типа протокола
 	bool chechParity () ;				///< Проверка паритета
+	bool checkFinish () ;				///< Проверка периода окончания посылки
 
 	void getData () {} ;
-	sensors::sensorState reset () ;
+	sensors::sensorState reset () ; ///< Сброс считывателя в исходное состояние
 	uint64_t getValue () ;				///< Получение значение ключа прочитанного со считывателя
+
 };
 
-} /* namespace protocol */
+} /* namespace reader */
 
 #endif /* PRCOMMONCLASS_TWIEGAND_HPP_ */

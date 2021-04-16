@@ -24,21 +24,22 @@
 
 #include "rtc.h"
 
+///  Всё, что казается работы с различными датчиками
 namespace sensors {
 
-/*!
- *  Возможные состояния датчика
- */
+ /*!
+* \ingroup Перечисления
+* Возможные состояния датчика
+*/
 enum sensorState {
-		ssUnknown,
-		ssOK,
-		ssWait,
-		ssReady,
-		ssErrorHW,
-		ssErrorSW,
-		ssErrorOther,
+		ssUnknown,		///< Хм.... Как я сюда попал? :(
+		ssOK,			///< Нормальное состояние
+		ssWait,			///< Ожидание
+		ssReady,		///< Состояние готовности данных
+		ssErrorHW,		///< Ошибка железа
+		ssErrorSW,		///< Ощибка ПО
+		ssErrorOther,	///< Прочая ошибка
 		ssCount}  ;
-
 
 constexpr uint32_t defSensorTimeOut = 100 ; 		///< Таймaут получения данных с датчика
 
@@ -55,16 +56,16 @@ protected:
 	RTC_DateTypeDef mDate { 0, } ;			///< Дата и время последнего обновления данный прочитанных с датчика
 	RTC_TimeTypeDef mTime { 0, } ;
 
-	virtual uint8_t getCRC (uint8_t *) = 0 ;///< Вычисление CRC
+	uint8_t getCRC (uint8_t *inData) { return 0 ; } ///< Вычисление CRC
 
 public:
 	TSensors () = default ;
-	~TSensors() = default ;
+	virtual ~TSensors() = default ;
 
 	virtual void getData () = 0 ;			///< Получение данных непосредственно с датчика
 	virtual T getValue () = 0 ;				///< Получение значения c датчика
 	sensorState getState () { return mState ; } ///< Получение состояния датчика
-	virtual sensorState reset () = 0 ;		///< Программый сброс датчика
+	sensorState reset () { return ssUnknown ; }	///< Программый сброс датчика
 };
 //-------------------------------------------------------------------
 } /* namespace sensors */
